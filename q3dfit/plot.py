@@ -640,7 +640,7 @@ def plotline(q3do, nx=1, ny=1, figsize=(16,13), line=None, center_obs=None,
 
     """
     ncomp = q3do.maxncomp
-    colors = ['Magenta', 'Green', 'Orange', 'Teal']
+    colors = ['Magenta', 'Green', 'Orange', 'Teal', 'Blue']
 
     wave = q3do.wave
     spectot = q3do.spec

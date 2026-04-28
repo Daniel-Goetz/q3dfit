@@ -256,7 +256,7 @@ class q3dout:
                      line_dat=None, line_fit=None, nfev=None,
                      noemlinmask=None, redchisq=None, param=None,
                      parinit=None, perror=None, perror_resid=None,
-                     perror_errspec=None, siglim=None):
+                     perror_errspec=None, siglim=None, aic=None, bic=None):
 
         self.dolinefit = True
 
@@ -277,6 +277,8 @@ class q3dout:
         self.perror_errspec = perror_errspec
         self.perror_resid = perror_resid
         self.redchisq = redchisq
+        self.aic = aic
+        self.bic = bic
         self.siglim = siglim
 
     def init_contfit(self, ct_method='CONTINUUM SUBTRACTED',

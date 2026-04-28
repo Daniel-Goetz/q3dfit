@@ -10,7 +10,7 @@ Created on Tue May 26 13:37:58 2020
 """
 import time
 import numpy as np
-
+import traceback
 from q3dfit.fitloop import fitloop
 import q3dfit.q3dutil as q3dutil
 
@@ -57,8 +57,8 @@ def execute_fitloop(nspax, colarr, rowarr, cube, q3di, linelist, specConv,
             try:
                 fitloop(ispax, colarr, rowarr, cube, q3di, linelist, specConv,
                             onefit=onefit, quiet=quiet, logfile=logfile)
-            except:
-                continue
+            except Exception:
+                print(traceback.format_exc(), file=logfile)
         else:           # Regular run; no continuation in case of crash
             fitloop(ispax, colarr, rowarr, cube, q3di, linelist, specConv,
                     onefit=onefit, quiet=quiet, logfile=logfile)
@@ -229,4 +229,4 @@ if __name__ == "__main__":
     else:
         nocrash = False
 
-    q3df_multiCore(rank, size, inobj, cols, rows, onefit, quiet, nocrash=nocrash)
+    q3df_multiCore(rank, size, inobj, cols, rows, onefit=onefit, quiet=quiet, nocrash=nocrash)

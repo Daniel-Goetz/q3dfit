@@ -13,7 +13,7 @@ import os
 
 def lineinit(linelist, linelistz, linetie, initflux, initsig, maxncomp, ncomp,
              specConv, lineratio=None, siglim=None, blrcomp=None, 
-             linevary=None, blrlines=None, blrsiglim=None, waves=None):
+             linevary=None, blrlines=None, blrsiglim=None, waves=None, flxlim=None):
     '''
 
     Initialize parameters for emission-line fitting.
@@ -138,9 +138,12 @@ def lineinit(linelist, linelistz, linetie, initflux, initsig, maxncomp, ncomp,
         # Process input values
         if gpar == 'flx' and inrange:
             value = initflux[line.label][comp]
-            limited = np.array([1, 0], dtype='uint8')
-            limits = np.array([np.finfo(float).eps, np.finfo(float).eps],
-                              dtype='float64')
+            if flxlim is None:
+                limited = np.array([1, 0], dtype='uint8')
+                limits = np.array([np.finfo(float).eps, np.finfo(float).eps], dtype='float64')
+            else:
+                limited = np.array([1, 1], dtype='uint8')
+                limits = np.array(flxlim, dtype='float64')
             # Check if it's a doublet; this will break if weaker line
             # is in list, but stronger line is not
             if line.label in dblt_pairs.keys():

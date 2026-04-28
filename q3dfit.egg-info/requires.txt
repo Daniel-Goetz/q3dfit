@@ -1,0 +1,10 @@
+astropy
+lmfit>=1.0.3
+matplotlib
+numpy>=1.22
+pandas
+photutils
+plotbin
+ppxf
+scikit-image
+scipy

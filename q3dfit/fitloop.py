@@ -161,16 +161,23 @@ def fitloop(ispax, colarr, rowarr, cube, q3di, listlines, specConv,
                         for k in q3di.lines:
                             siginit_gas[k] = q3di.siginit_gas[k][i, j, ]
 
+                # initialize flux peak guess
+                if q3di.fluxinit is not None:
+                    fluxinit = dict()
+                    fluxinit_nans = False
+                    for k in q3di.lines:
+                        fluxinit[k] = q3di.fluxinit[k][i, j, ]
+                        if any(np.isnan(fluxinit[k])):
+                            fluxinit_nans = True
+                    if fluxinit_nans:
+                        fluxinit = None  # set to None for standard behavior
+
                 # initialize starting wavelengths for lines
                 # u['line'][(u['name']=='Halpha')]
                 listlinesz = dict()
                 if q3di.dolinefit:
                     for line in q3di.lines:
-                        listlinesz[line] = \
-                            np.array(listlines['lines']
-                                     [(listlines['name'] == line)],
-                                     dtype='float64') * \
-                                (1. + q3di.zinit_gas[line][i, j, ])
+                        listlinesz[line] = np.array(listlines['lines'][(listlines['name'] == line)], dtype='float64') * (1. + q3di.zinit_gas[line][i, j, ])
 
             if q3di.docontfit:
 
@@ -218,6 +225,7 @@ def fitloop(ispax, colarr, rowarr, cube, q3di, listlines, specConv,
             q3do_init = fitspec(cube.wave, flux, err, dq, zstar, listlines,
                                 listlinesz, ncomp, specConv, q3di, quiet=quiet,
                                 linevary=linevary,
+                                peakinit=fluxinit,
                                 siglim_gas=siglim_gas,
                                 siginit_gas=siginit_gas,
                                 siginit_stars=siginit_stars,

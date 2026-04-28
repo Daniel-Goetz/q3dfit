@@ -57,8 +57,10 @@ def q3dcollect(q3di, cols=None, rows=None, quiet=True, compsortpar='sigma',
 
     # set up linelist
     if q3di.dolinefit:
-
-        print('Sorting components by '+compsortpar+' in the '+
+        if compsortpar is None:
+            print('Not sorting components')
+        else:
+            print('Sorting components by '+compsortpar+' in the '+
               compsortdir+'ward direction.')
 
         linelist = q3dutil.get_linelist(q3di)
@@ -145,14 +147,14 @@ def q3dcollect(q3di, cols=None, rows=None, quiet=True, compsortpar='sigma',
 
     # create output cubes
     if q3di.docontfit:
-        hostcube = {'dat': np.zeros((cube.ncols, cube.nrows, cube.nwave)),
+        contcube = {'dat': np.zeros((cube.ncols, cube.nrows, cube.nwave)),
                     'err': np.zeros((cube.ncols, cube.nrows, cube.nwave)),
                     'dq':  np.zeros((cube.ncols, cube.nrows, cube.nwave)),
                     'norm_div': np.zeros((cube.ncols, cube.nrows,
                                           cube.nwave)),
                     'norm_sub': np.zeros((cube.ncols, cube.nrows,
-                                          cube.nwave))}
-        contcube = {'npts': np.zeros((cube.ncols, cube.nrows)) + np.nan,
+                                          cube.nwave)),
+                    'npts': np.zeros((cube.ncols, cube.nrows)) + np.nan,
                     'stel_rchisq': np.zeros((cube.ncols, cube.nrows)) + np.nan,
                     'stel_z': np.zeros((cube.ncols, cube.nrows)) + np.nan,
                     'stel_z_err': np.zeros((cube.ncols, cube.nrows, 2)) + np.nan,
@@ -272,13 +274,16 @@ def q3dcollect(q3di, cols=None, rows=None, quiet=True, compsortpar='sigma',
                 for line in lines_with_doublets:
                     sigtmp = q3do.line_fitpars['sigma'][line]
                     fluxtmp = q3do.line_fitpars['flux'][line]
-                    # TODO
-                    igd = [idx for idx in range(len(sigtmp)) if
-                           (sigtmp[idx] != 0 and
-                            not np.isnan(sigtmp[idx]) and
-                            fluxtmp[idx] != 0 and
-                            not np.isnan(fluxtmp[idx]))]
-                    ctgd = len(igd)
+                    if compsortpar is not None:
+                        # TODO
+                        igd = [idx for idx in range(len(sigtmp)) if
+                            (sigtmp[idx] != 0 and
+                                not np.isnan(sigtmp[idx]) and
+                                fluxtmp[idx] != 0 and
+                                not np.isnan(fluxtmp[idx]))]
+                        ctgd = len(igd)
+                    else:
+                        ctgd = len(sigtmp) - np.argmax((sigtmp > 0)[::-1])
 
                     if ctgd > thisncomp:
                         thisncomp = ctgd
@@ -296,12 +301,14 @@ def q3dcollect(q3di, cols=None, rows=None, quiet=True, compsortpar='sigma',
 
                 if thisncomp == 1:
                     isort = [0]
-                elif thisncomp >= 2:
+                elif (thisncomp >= 2) and (compsortpar is not None):
                     igd = np.arange(thisncomp)
                     sortpars = q3do.line_fitpars[compsortpar][thisncompline]
                     isort = np.argsort(sortpars[igd])
                     if compsortdir == 'down':
                         isort = np.flip(isort)
+                elif (thisncomp >= 2) and (compsortpar is None):
+                    isort = np.arange(thisncomp)
                 if thisncomp > 0:
                     for line in lines_with_doublets:
                         kcomp = 1
@@ -341,12 +348,12 @@ def q3dcollect(q3di, cols=None, rows=None, quiet=True, compsortpar='sigma',
                 # process continuum parameters
                 q3do.sepcontpars(q3di)
 
-                hostcube['dat'][i, j, q3do.fitran_indx] = q3do.cont_dat
-                hostcube['err'][i, j, q3do.fitran_indx] = err[q3do.fitran_indx]
-                hostcube['dq'][i, j, q3do.fitran_indx] = dq[q3do.fitran_indx]
-                hostcube['norm_div'][i, j, q3do.fitran_indx] \
+                contcube['dat'][i, j, q3do.fitran_indx] = q3do.cont_dat
+                contcube['err'][i, j, q3do.fitran_indx] = err[q3do.fitran_indx]
+                contcube['dq'][i, j, q3do.fitran_indx] = dq[q3do.fitran_indx]
+                contcube['norm_div'][i, j, q3do.fitran_indx] \
                     = np.divide(q3do.cont_dat, q3do.cont_fit)
-                hostcube['norm_sub'][i, j, q3do.fitran_indx] \
+                contcube['norm_sub'][i, j, q3do.fitran_indx] \
                     = np.subtract(q3do.cont_dat, q3do.cont_fit)
 
                 if q3di.decompose_ppxf_fit:
@@ -395,7 +402,7 @@ def q3dcollect(q3di, cols=None, rows=None, quiet=True, compsortpar='sigma',
 
                 if q3di.decompose_qso_fit:
 
-                    hostcube['dat'][i, j, q3do.fitran_indx] \
+                    contcube['dat'][i, j, q3do.fitran_indx] \
                         = q3do.cont_dat - q3do.qsomod
                     contcube['qso_mod'][i, j, q3do.fitran_indx] = \
                         q3do.qsomod

@@ -173,12 +173,14 @@ class q3din:
         self.linetie = {}
         self.linevary = {}
         self.ncomp = {}
+        self.fluxinit = {}
         self.siginit_gas = {}
         self.zinit_gas = {}
         for i, line in enumerate(self.lines):
             self.linetie[line] = linetie[i]
             self.ncomp[line] = np.full((self.ncols, self.nrows),
                                        self.maxncomp, dtype='int')
+            self.fluxinit[line] = np.full((self.ncols, self.nrows, self.maxncomp), np.nan, dtype='float64')
             self.zinit_gas[line] = np.full((self.ncols, self.nrows,
                                             self.maxncomp), zinit,
                                            dtype='float64')

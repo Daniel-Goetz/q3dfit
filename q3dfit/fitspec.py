@@ -87,6 +87,10 @@ def fitspec(wlambda, flux, err, dq, zstar, listlines, listlinesz, ncomp,
         from sys import stdout
         logfile = stdout
 
+    # Set startempfile = None, if the continnum wasn't initialized  
+    if not q3di.docontfit:
+        q3di.startempfile = None
+
     if q3di.startempfile is not None and \
         zstar is not None and \
         q3di.fcncontfit != 'questfit':
@@ -227,6 +231,7 @@ def fitspec(wlambda, flux, err, dq, zstar, listlines, listlinesz, ncomp,
     else:
 
         gdflux = np.array((0.))
+        gdinvvar = np.array((0.))
         q3do = q3dout.q3dout(0., 0., 0.,  nogood=True)
 
     # timer
@@ -236,18 +241,10 @@ def fitspec(wlambda, flux, err, dq, zstar, listlines, listlinesz, ncomp,
 # Fit continuum
 # ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-    if q3di.docontfit and not q3do.nogood:
-
-        q3do.init_contfit(zstar=zstar)
-
-        # Some defaults. These only apply in case of fitting with stellar model
-        # + additive polynomial.
-        # stel_mod = 0.
-        # poly_mod = 0.
-
         # Mask emission lines
         # Note that maskwidths is now an astropy Table
         # Column names are line labels, rows are components
+    if not q3do.nogood:
         if not q3di.nolinemask:
             if maskwidths is None:
                 if q3di.maskwidths is not None:
@@ -274,6 +271,15 @@ def fitspec(wlambda, flux, err, dq, zstar, listlines, listlinesz, ncomp,
 
         q3do.ct_indx = np.intersect1d(q3do.ct_indx, gd_indx)
         ct_indx_log = np.intersect1d(ct_indx_log, gd_indx_log)
+
+    if q3di.docontfit and not q3do.nogood:
+
+        q3do.init_contfit(zstar=zstar, ct_indx=q3do.ct_indx)
+
+        # Some defaults. These only apply in case of fitting with stellar model
+        # + additive polynomial.
+        # stel_mod = 0.
+        # poly_mod = 0.
 
     # ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     # # Option 1: Input function that is not ppxf
@@ -428,6 +434,9 @@ def fitspec(wlambda, flux, err, dq, zstar, listlines, listlinesz, ncomp,
 
         continuum = gdflux.copy()
 
+        q3do.zstar = zstar
+        gdinvvar_nocnt = gdinvvar.copy()
+        fit_time1 = time.time()
 
 # ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 # Fit emission lines
@@ -614,6 +623,8 @@ def fitspec(wlambda, flux, err, dq, zstar, listlines, listlinesz, ncomp,
             q3do.covar = lmout.covar
             q3do.dof = lmout.nfree
             q3do.redchisq = lmout.redchi
+            q3do.aic = lmout.aic
+            q3do.bic = lmout.bic
             q3do.nfev = lmout.nfev
 
             '''

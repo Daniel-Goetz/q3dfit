@@ -1,0 +1,26 @@
+Metadata-Version: 2.2
+Name: q3dfit
+Version: 1.2.0
+Home-page: https://q3dfit.readthedocs.io/en/latest/index.html
+Author: David Rupke and the Q3D Team
+Author-email: drupke@gmail.com
+License: GPL-3
+License-File: LICENSE
+Requires-Dist: astropy
+Requires-Dist: lmfit>=1.0.3
+Requires-Dist: matplotlib
+Requires-Dist: numpy>=1.22
+Requires-Dist: pandas
+Requires-Dist: photutils
+Requires-Dist: plotbin
+Requires-Dist: ppxf
+Requires-Dist: scikit-image
+Requires-Dist: scipy
+Dynamic: author
+Dynamic: author-email
+Dynamic: description
+Dynamic: home-page
+Dynamic: license
+Dynamic: requires-dist
+
+Model astronomical data from integral field spectrographs.
